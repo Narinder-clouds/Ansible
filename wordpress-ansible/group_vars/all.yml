@@ -1,0 +1,13 @@
+---
+mysql_root_password: "Aizen@123"
+mysql_db_name: "wordpress"
+mysql_user: "aizen"
+mysql_user_password: "Aizen@123"
+
+wordpress_db_name: "wordpress"
+wordpress_db_user: "aizen"
+wordpress_db_password: "Aizen@123"
+# wordpress_db_host: "{{ hostvars['mysql_server']['ansible_host'] }}"
+wordpress_db_host: "127.0.0.1"
+wordpress_install_dir: "/var/www/html/wordpress"
+

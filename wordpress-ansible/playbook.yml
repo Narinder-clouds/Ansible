@@ -1,0 +1,12 @@
+- name: Configure MySQL Server
+  hosts: webserver
+  become: yes
+  roles:
+    - mysql
+
+# - name: Configure WordPress Server
+#   hosts: webserver
+#   become: yes
+#   roles:
+#     - wordpress
+

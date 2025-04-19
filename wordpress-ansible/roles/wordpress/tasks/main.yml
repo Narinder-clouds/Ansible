@@ -1,0 +1,101 @@
+---
+    - name: Install Required Packages
+      apt:
+        name:
+          - apache2
+          - php
+          - php-mysql
+          - wget
+          - libapache2-mod-php
+          - php-common
+          - php-xml
+          - php-xmlrpc
+          - php-curl
+          - php-gd
+          - php-imagick
+          - php-cli
+          - php-dev
+          - php-imap
+          - php-mbstring
+          - php-opcache
+          - php-soap
+          - php-zip
+          - php-intl
+        state: present
+        update_cache: yes
+
+    - name: Start and Enable Apache
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Disable mpm_event Module (Fix PHP Conflict)
+      command: a2dismod mpm_event
+      register: disable_mpm_event
+      changed_when: disable_mpm_event.rc == 0
+
+    - name: Enable mpm_prefork Module
+      command: a2enmod mpm_prefork
+      register: enable_mpm_prefork
+      changed_when: enable_mpm_prefork.rc == 0
+
+    - name: Enable PHP 8.3 Module
+      command: a2enmod php8.3
+      register: enable_php
+      changed_when: enable_php.rc == 0
+
+    - name: Restart Apache to Apply Changes
+      service:
+        name: apache2
+        state: restarted
+
+    # - name: Check if WordPress is Already Installed
+    #   stat:
+    #     path: /var/www/html/wp-config.php
+    #   register: wp_installed
+
+    - name: Download WordPress if Not Installed
+      get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /tmp/wordpress.tar.gz
+      # when: not wp_installed.stat.exists
+
+    - name: Extract WordPress if Not Installed
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /var/www/html/
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+      # when: not wp_installed.stat.exists
+
+    - name: Set Correct Permissions
+      file:
+        path: /var/www/html/
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+        recurse: yes
+    
+    - name: Copy wp-config-sample.php to wp-config.php
+      copy:
+        src: /var/www/html/wp-config-sample.php
+        dest: /var/www/html/wp-config.php
+        remote_src: yes
+      # when: not wp_installed.stat.exists
+
+    - name: Configure WordPress Database Settings
+      template:
+        src: wp-config.php.j2
+        dest: /var/www/html/wp-config.php
+
+    - name: Remove Apache default index.html
+      file:
+        path: /var/www/html/index.html
+        state: absent
+
+    - name: Restart Apache Again After Configurations
+      service:
+        name: apache2
+        state: restarted

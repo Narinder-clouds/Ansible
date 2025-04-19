@@ -1,0 +1,6 @@
+# ---
+# wordpress_db_name: "wordpress"
+# wordpress_db_user: "aizen"
+# wordpress_db_password: "Aizen@123"
+# wordpress_db_host: "{{ hostvars['mysql_server']['ansible_host'] }}"
+# wordpress_install_dir: "/var/www/html/wordpress"

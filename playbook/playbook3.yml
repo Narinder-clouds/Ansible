@@ -1,0 +1,31 @@
+-
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+  vars:
+    data: "Hello from Aizen"
+    Path: "/home/aizen/ansible/playbook/hello.txt"
+
+  tasks:
+    - name: install VIM
+      package:
+         name: vim
+         state: present
+
+    - name: create file
+      copy:
+        content: "{{ data }}"
+        dest: "{{ Path }}"
+      notify: printing_output
+      when: ansible_distribution | lower == 'ubuntu'
+    
+    - name: cat file
+      shell: |
+        cat "{{ Path }}" 
+      register: file_content
+      changed_when: false
+
+  handlers:
+    - name: printing_output
+      debug:
+        msg: "{{ file_content.stdout }}"

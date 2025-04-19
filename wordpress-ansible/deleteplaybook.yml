@@ -1,0 +1,59 @@
+---
+- name: Remove MySQL and WordPress
+  hosts: all
+  become: yes
+  tasks:
+
+  - name: Stop Apache and MySQL services
+    service:
+      name: "{{ item }}"
+      state: stopped
+    loop:
+      - apache2
+      - mysql
+
+  - name: Uninstall MySQL
+    apt:
+      name:
+        - mysql-server
+        - mysql-client
+        - mysql-common
+        - libmysqlclient-dev
+      state: absent
+      purge: yes
+      autoremove: yes
+
+  - name: Remove MySQL data directory
+    file:
+      path: /var/lib/mysql
+      state: absent
+
+  - name: Remove MySQL configuration files
+    file:
+      path: /etc/mysql
+      state: absent
+
+  - name: Uninstall Apache & PHP
+    apt:
+      name:
+        - apache2
+        - php
+        - php-mysql
+        - libapache2-mod-php
+      state: absent
+      purge: yes
+      autoremove: yes
+
+  - name: Remove WordPress files
+    file:
+      path: /var/www/html/
+      state: absent
+
+  - name: Clean up package cache
+    apt:
+      autoclean: yes
+      autoremove: yes
+
+  - name: Reload Systemd
+    command: systemctl daemon-reload
+
